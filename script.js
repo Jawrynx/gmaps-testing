@@ -1,5 +1,8 @@
 // Initialize and add the maps
 let fromMap, toMap;
+var map;
+var service;
+var infowindow;
 
 async function initMap() {
   // Locations
@@ -26,17 +29,48 @@ async function initMap() {
   });
 
   // Markers
-  new AdvancedMarkerElement({
+  let fromMarker = new AdvancedMarkerElement({
     map: fromMap,
     position: fromPosition,
     title: "Uluru",
   });
 
-  new AdvancedMarkerElement({
+  let toMarker = new AdvancedMarkerElement({
     map: toMap,
     position: toPosition,
     title: "London",
   });
+
+  //Request AutoComplete
+  const { Autocomplete } = await google.maps.importLibrary("places");
+
+  //retrieve inputs
+  const fromSearchField = document.getElementById("fromSearchField");
+  const toSearchField = document.getElementById("toSearchField");
+
+  const fromAutocomplete = new Autocomplete(fromSearchField);
+  const toAutocomplete = new Autocomplete(toSearchField);
+
+  fromAutocomplete.addListener("place_changed", () => {
+    const place = fromAutocomplete.getPlace();
+    if (place.geometry && place.geometry.location) {
+      fromMap.setCenter(place.geometry.location);
+      fromMap.setZoom(12); // Adjust zoom as needed
+
+      fromMarker.position = place.geometry.location;
+    }
+  });
+
+  toAutocomplete.addListener("place_changed", () => {
+    const place = toAutocomplete.getPlace();
+    if (place.geometry && place.geometry.location) {
+      toMap.setCenter(place.geometry.location);
+      toMap.setZoom(12); // Adjust zoom as needed
+
+      toMarker.position = place.geometry.location;
+    }
+  });
+
 }
 
 initMap();
